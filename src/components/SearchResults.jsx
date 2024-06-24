@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import FilterPanel from './FilterPanel';
 import Pagination from './Pagination';
 
-const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPageChange, currentFilters, onFilterChange }) => {
+const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPageChange, currentFilters, onFilterChange, loading }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [filteredResults, setFilteredResults] = useState(results);
+  const [showFullText, setShowFullText] = useState([]);
 
   useEffect(() => {
     if (selectedFilters.length === 0) {
@@ -14,10 +15,16 @@ const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPage
     }
   }, [selectedFilters, results]);
 
+  useEffect(() => {
+    setShowFullText(new Array(filteredResults.length).fill(false));
+  }, [filteredResults]);
+
   const docs = filteredResults || [];
 
-  const truncateText = (text, maxLength) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  const toggleShowFullText = (index) => {
+    const updatedShowFullText = [...showFullText];
+    updatedShowFullText[index] = !updatedShowFullText[index];
+    setShowFullText(updatedShowFullText);
   };
 
   const mapCurrentFiltersToFilters = (currentFilters) => {
@@ -44,6 +51,21 @@ const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPage
     onFilterChange(fq);
   };
 
+  if (loading) {
+    return (
+      <div className="search-results-page-body">
+        <div className="container">
+          <div className="search-results-container">
+            <div className="loading-overlay">
+              <div className="loading-spinner"></div>
+              <p>Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="search-results-page-body">
       <div className="container">
@@ -66,14 +88,21 @@ const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPage
                       </div>
                       <div className="col-10 search-results-content-description">
                         <div className="search-results-content__title">{result.title}</div>
-                        <p className="search-results-heading">{result.id.split("!")[1]}</p> 
                         <p className="search-results-heading"><strong>Section Name:</strong> {result.type}</p> 
                         <p className="search-results-heading"><strong>Sub family: </strong> {result.subfamily_t}</p>
-                        <p className="search-results-heading">{truncateText(result.text_orig, 300)}</p>
+                        <p className="search-results-heading">
+                          {!showFullText[index] ? result.text_orig : result.text_orig.substring(0, 100) + '...'}
+                        </p>
                         <p className="search-results-links" role="link" tabIndex="0" style={{color: "#2679b8"}}>{result.url}</p>
                       </div>
                     </div>
                   </a>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <p className="search-results-heading"><strong>Score: </strong> {result.score}</p> 
+                    <button className="btn btn-link" onClick={() => toggleShowFullText(index)}>
+                      {showFullText[index] ? 'View complete description' : 'Truncate description'}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

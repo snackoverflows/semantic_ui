@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function SearchForm({ onSearch }) {
-  const [query, setQuery] = useState('');
+function SearchForm({ onSearch, initialQuery }) {
+  const [query, setQuery] = useState(initialQuery || '');
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -16,7 +20,7 @@ function SearchForm({ onSearch }) {
     <form onSubmit={handleSubmit} className="form global-search-form">
       <div className="global-search-results-form row">
         <div className="float-container col-7 col-lg-10 col-md-8 col-sm-6 col-xs-6">
-        <img className="search-icon" src="https://static-00.iconduck.com/assets.00/search-icon-2048x2048-cmujl7en.png" alt="Search" title="Search" style={{ width: '20px', height: '20px' }} />
+          <img className="search-icon" src="https://static-00.iconduck.com/assets.00/search-icon-2048x2048-cmujl7en.png" alt="Search" title="Search" style={{ width: '20px', height: '20px' }} />
           <label htmlFor="globalSearchInput">Search</label>
           <input
             className="col-11"
