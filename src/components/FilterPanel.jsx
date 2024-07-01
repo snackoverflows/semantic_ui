@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function FilterPanel({ filters, onFilterChange }) {
+function FilterPanel({ filters, selected, onFilterChange }) {
   const [selectedFilters, setSelectedFilters] = useState([]);
 
+  useEffect(() => {
+    setSelectedFilters(selected);
+  }, [selected]);
+
   const handleCheckboxChange = (filterValue) => {
-    let updatedFilters;
-    if (selectedFilters.includes(filterValue)) {
-      updatedFilters = selectedFilters.filter(f => f !== filterValue);
+    const updatedFilters = [...selectedFilters];
+    if (updatedFilters.includes(filterValue)) {
+      updatedFilters.splice(updatedFilters.indexOf(filterValue), 1);
     } else {
-      updatedFilters = [...selectedFilters, filterValue];
+      updatedFilters.push(filterValue);
     }
     setSelectedFilters(updatedFilters);
     onFilterChange(updatedFilters);
@@ -34,21 +38,20 @@ function FilterPanel({ filters, onFilterChange }) {
               Clear All
             </a>
           </div>
-          {filters.map((filter, index) => (
+          {filters.map((filterGroup, index) => (
             <div className="filter--group" key={index}>
-              <h2 className="filter--panel__section-header">{filter.title}</h2>
+              <h2 className="filter--panel__section-header">{filterGroup.title}</h2>
               <div className="filter--inner filter--inner-visible">
                 <ul className="menu-list">
-                  {filter.options.map((option, optionIndex) => (
+                  {filterGroup.options.map((option, optionIndex) => (
                     <li key={optionIndex}>
                       <div>
                         <label className="checkbox filterCheckbox">
                           <input
-                            tabIndex="0"
                             type="checkbox"
                             checked={selectedFilters.includes(option.value)}
                             onChange={() => handleCheckboxChange(option.value)}
-                          /> 
+                          />
                           {option.label} ({option.count})
                         </label>
                       </div>

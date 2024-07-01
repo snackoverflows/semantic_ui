@@ -28,7 +28,7 @@ body, html {
 
 .container {
   max-width: 100%;
-  overflow-x: auto; /* Permitir scroll horizontal si es necesario */
+  overflow-x: hidden; /* Permitir scroll horizontal si es necesario */
   padding: 20px;
   background: #fff;
 }

@@ -43,7 +43,8 @@ const ResultsPage = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState([]);
-  const [loading, setLoading] = useState(false); // Estado de carga
+  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [loading, setLoading] = useState(false);
   const rowsPerPage = 16;
   const location = useLocation();
 
@@ -63,13 +64,14 @@ const ResultsPage = () => {
   }, [location.search, location.state]);
 
   const handleSearch = async (searchQuery, start = 0, fq = '') => {
-    setLoading(true); // Activa el estado de carga
+    setLoading(true);
     const username = 'josue.vargas@accenture.com';
     const password = 'josue@LW01';
     const credentials = btoa(`${username}:${password}`);
 
     try {
-      const response = await fetch(`https://caterpillares-dev.b.lucidworks.cloud:443/api/apps/P3_Semantic_Search_POC/query/P3_Semantic_Search_POC?expand=true&fq=%7B%21collapse%20field%3Durl%7D&rows=${rowsPerPage}&start=${start}&q=${searchQuery}&fq=${fq}`, {
+      const endpoint = `https://caterpillares-dev.b.lucidworks.cloud:443/api/apps/P3_Semantic_Search_POC/query/P3_Semantic_Search_POC?expand=true&fq=%7B%21collapse%20field%3Durl%7D&rows=${rowsPerPage}&start=${start}&q=${searchQuery}&fq=${fq}`
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -84,22 +86,26 @@ const ResultsPage = () => {
 
       const data = await response.json();
 
-      console.log(data);
       setProducts(data.response.docs);
       setTotalResults(data.response.numFound);
-      setCurrentFilters(data.facet_counts.facet_fields.subfamily_s);
+      setCurrentFilters(data.facet_counts.facet_fields.subfamily_s || []);
       setQuery(searchQuery);
       setCurrentPage(start / rowsPerPage + 1);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
-      setLoading(false); // Desactiva el estado de carga
+      setLoading(false);
     }
   };
 
   const handlePageChange = (pageNumber) => {
     const newStart = (pageNumber - 1) * rowsPerPage;
-    handleSearch(query, newStart);
+    handleSearch(query, newStart, selectedFilters.map(filter => `subfamily_s:"${encodeURIComponent(filter)}"`).join(' OR '));
+  };
+
+  const handleFilterChange = (filters) => {
+    setSelectedFilters(filters);
+    handleSearch(query, 0, filters.map(filter => `subfamily_s:"${encodeURIComponent(filter)}"`).join(' OR '));
   };
 
   return (
@@ -123,7 +129,8 @@ const ResultsPage = () => {
               rowsPerPage={rowsPerPage} 
               onPageChange={handlePageChange}
               currentFilters={currentFilters} 
-              onFilterChange={(filters) => handleSearch(query, 0, filters)}
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
             />
           )}
         </div>

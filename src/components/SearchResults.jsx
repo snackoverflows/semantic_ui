@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FilterPanel from './FilterPanel';
 import Pagination from './Pagination';
 
-const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPageChange, currentFilters, onFilterChange, loading }) => {
-  const [selectedFilters, setSelectedFilters] = useState([]);
+const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPageChange, currentFilters, selectedFilters, onFilterChange, loading }) => {
   const [filteredResults, setFilteredResults] = useState(results);
   const [showFullText, setShowFullText] = useState([]);
 
@@ -45,32 +44,15 @@ const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPage
 
   const structuredFilters = mapCurrentFiltersToFilters(currentFilters);
 
-  const handleFilterChange = (selected) => {
-    setSelectedFilters(selected);
-    const fq = selected.map(filter => `subfamily_s:"${encodeURIComponent(filter)}"`).join(' OR ');
-    onFilterChange(fq);
-  };
-
-  if (loading) {
-    return (
-      <div className="search-results-page-body">
-        <div className="container">
-          <div className="search-results-container">
-            <div className="loading-overlay">
-              <div className="loading-spinner"></div>
-              <p>Loading...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="search-results-page-body">
       <div className="container">
         <div className="search-results-container row">
-          <FilterPanel filters={structuredFilters} onFilterChange={handleFilterChange} />
+          <FilterPanel 
+            filters={structuredFilters} 
+            selected={selectedFilters} 
+            onFilterChange={onFilterChange} 
+          />
           <div className="col-lg-8 col-md-12 col-sm-12 pfp-right-col">
             <Pagination 
               totalResults={totalResults} 
@@ -91,7 +73,7 @@ const SearchResults = ({ results, totalResults, currentPage, rowsPerPage, onPage
                         <p className="search-results-heading"><strong>Section Name:</strong> {result.type}</p> 
                         <p className="search-results-heading"><strong>Sub family: </strong> {result.subfamily_t}</p>
                         <p className="search-results-heading">
-                          {!showFullText[index] ? result.text_orig : result.text_orig.substring(0, 100) + '...'}
+                          {showFullText[index] ? result.text_orig : result.text_orig.substring(0, 100) + '...'}
                         </p>
                         <p className="search-results-links" role="link" tabIndex="0" style={{color: "#2679b8"}}>{result.url}</p>
                       </div>

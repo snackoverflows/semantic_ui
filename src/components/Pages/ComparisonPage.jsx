@@ -12,9 +12,16 @@ const ComparisonPage = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState([]);
-  const [loading, setLoading] = useState(false); // Estado de carga
+  const [loading, setLoading] = useState(false);
   const rowsPerPage = 10;
   const location = useLocation();
+
+  useEffect(() => {
+    document.body.style.zoom = '80%';
+    return () => {
+      document.body.style.zoom = '100%';
+    };
+  }, []);
 
   useEffect(() => {
     const stateQuery = location.state?.query || '';
@@ -57,7 +64,7 @@ const ComparisonPage = () => {
   };
 
   const handleSearch = async (searchQuery, start = 0, fq = '') => {
-    setLoading(true); // Activa el estado de carga
+    setLoading(true);
     const username = 'josue.vargas@accenture.com';
     const password = 'josue@LW01';
     const credentials = btoa(`${username}:${password}`);
